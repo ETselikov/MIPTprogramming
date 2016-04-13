@@ -8,7 +8,7 @@ relx = rely = 0
 WIN_WIDTH = 800 
 WIN_HEIGHT = 800 
 DISPLAY = (WIN_WIDTH, WIN_HEIGHT) 
-BACKGROUND_COLOR = "#004400"
+BACKGROUND_COLOR = "#4BBA4D"
 
 class Camera(object):
     def __init__(self, camera_func, width, height):
@@ -43,7 +43,9 @@ def main():
     bg.fill(Color(BACKGROUND_COLOR))     
     pygame.mouse.set_cursor(*pygame.cursors.tri_left)
     entities = pygame.sprite.Group() 
-    platforms = [] 
+    roads = []
+    buildzones = []
+    
 
     f = open('Level.txt', 'r')
     level = f.readlines()
@@ -53,16 +55,20 @@ def main():
     for row in level: 
         for col in row: 
             if col == "#":
-                pf = Platform(x,y)
-                entities.add(pf)
-                platforms.append(pf)
-
-            x += PLATFORM_WIDTH 
-        y += PLATFORM_HEIGHT    
+                ro = Road(x,y)
+                entities.add(ro)
+                roads.append(ro)
+            if col == " ":
+                bz = Build_Zone(x,y)
+                entities.add(bz)
+                buildzones.append(bz)
+                
+            x += BLOCK_WIDTH 
+        y += BLOCK_HEIGHT    
         x = 0                   
     
-    total_level_width  = len(level[0])*PLATFORM_WIDTH 
-    total_level_height = len(level)*PLATFORM_HEIGHT   
+    total_level_width  = len(level[0])*BLOCK_WIDTH 
+    total_level_height = len(level)*BLOCK_HEIGHT   
     
     Cam1 = Cams(int(total_level_width/4),int(total_level_height/4)) 
     left = right = False 
