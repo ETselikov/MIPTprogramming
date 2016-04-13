@@ -4,9 +4,18 @@ from Cams import *
 from blocks import *
 relx = rely = 0
 WIN_WIDTH = 800 
-WIN_HEIGHT = 640 
+WIN_HEIGHT = 800 
 DISPLAY = (WIN_WIDTH, WIN_HEIGHT) 
 BACKGROUND_COLOR = "#004400"
+
+class Mouse(object):
+    def __init__(self, relx, rely):
+        self.relx = 0
+        self.rely = 0
+    def update(self, camx, camy):
+        (mosx, mosy) = pygame.mouse.get_pos()
+        self.relx = int((mosx - 400)/20)
+        self.rely = int((mosy - 400)/20)
 
 class Camera(object):
     def __init__(self, camera_func, width, height):
@@ -39,41 +48,61 @@ def main():
     bg = Surface((WIN_WIDTH,WIN_HEIGHT)) 
                                          
     bg.fill(Color(BACKGROUND_COLOR))     
-    
-    Cam1 = Cams(800,400) 
-    left = right = False 
-    up = down = False
-    
+
     entities = pygame.sprite.Group() 
     platforms = [] 
-    
-    entities.add(Cam1)
            
     level = [
-       "                                                       ",
-       "    #  # #  # #  # #  # ##### ####                     ",
-       "    #  # #  # # #  #  #   #   #  #                     ",
-       "    #### # ## ##   # ##   #   ####                     ",
-       "    #  # ## # # #  ## #   #   #  #                     ",
-       "    #  # #  # #  # #  #   #   #  #                     ",
-       "                                                       ",
-       "                                                       ",
-       "                                                       ",
-       "                                                       ",
-       "                                                       ",
-       "      ### #### #   #                                   ",
-       "     #  # #  #  # #                                    ",
-       "     #  # #  #   #                                     ",
-       "     #  # #  #  # #                                    ",
-       "     #  # #### #   #                                   ",
-       "                                                       ",
-       "                                                       ",
-       "                                                       ",
-       "                                                       ",
-       "                                                       ",
-       "                                                       ",
-       "                                                       ",
-       "                                                       "]                                    
+       "                                                  ",
+       "    #  # #  # #  # #  # #                         ",
+       "                                                  ",
+       "    #  # #  # # #  #  #                           ",
+       "                                                  ",
+       "    #### # ## ##   # ##                           ",
+       "    #  # ## # # #  ## #                           ",
+       "                                                  ",
+       "    #  # #  # #  # #  #                           ",
+       "                                                  ",
+       "                                                  ",
+       "                                                  ",
+       "                                                  ",
+       "                              #  # #### #   #     ",
+       "                                                  ",
+       "      ### #### #   #          #  # #### #   #     ",
+       "     #  # #  #  # #                               ",
+       "     #  # #  #   #            #  # #### #   #     ",
+       "                                                  ",
+       "     #  # #  #  # #           #  # #### #   #     ",
+       "                                                  ",
+       "     #  # #### #   #          #  # #### #   #     ",
+       "                                                  ",
+       "     #  # #### #   #         #  # #### #   #      ",
+       "                                                  ",
+       "                                                  ",
+       "     #  # #### #   #                              ",
+       "                                                  ",
+       "                              #  # #### #   #     ",
+       "                                                  ",
+       "                                                  ",
+       "                                                  ",
+       "                              #  # #### #   #     ",
+       "                                                  ",
+       "                                                  ",
+       "                                                  ",
+       "                                                  ",
+       "                                                  ",
+       "      ### #### #   #          #  # #### #   #     ",
+       "                                                  ",
+       "     #  # #  #  # #                               ",
+       "                                                  ",
+       "     #  # #  #   #            #  # #### #   #     ",
+       "                                                  ",
+       "     #  # #  #  # #           #  # #### #   #     ",
+       "                                                  ",
+       "     #  # #### #   #          #  # #### #   #     ",
+       "     #  # #### #   #         #  # #### #   #      ",
+       "     #  # #### #   #                              ",
+       "##################################################",]                                    
        
     timer = pygame.time.Clock()
     x=y=0 
@@ -91,37 +120,42 @@ def main():
     total_level_width  = len(level[0])*PLATFORM_WIDTH 
     total_level_height = len(level)*PLATFORM_HEIGHT   
     
+    Cam1 = Cams(int(total_level_width/4),int(total_level_height/4)) 
+    left = right = False 
+    up = down = False
+    entities.add(Cam1)
+    
     camera = Camera(camera_configure, total_level_width, total_level_height) 
-
-    pygame.mouse.set_pos(70,70)
-    pygame.mouse.get_rel()
+    
+    pygame.mouse.set_pos(int(total_level_width/4),int(total_level_height/4))
+    mos = Mouse(relx, rely)
+    
     while 1: 
         timer.tick(60)
+        
+        mos.update(Cam1.rect.x, Cam1.rect.y)
+        if mos.relx > 0:
+            left = False
+            right = True
+        if mos.relx < 0:
+            right = False
+            left = True
+        if mos.rely > 0:
+            down = True
+            up = False
+        if mos.rely < 0:
+            up = True
+            down = False
         for e in pygame.event.get(): 
             if e.type == QUIT:
                 pygame.quit()
-            if e.type == KEYDOWN and e.key == K_UP:
-                up = True
-            if e.type == KEYDOWN and e.key == K_LEFT:
-                left = True
-            if e.type == KEYDOWN and e.key == K_RIGHT:
-                right = True
-            if e.type == KEYDOWN and e.key == K_DOWN:
-                down = True
-
-            if e.type == KEYUP and e.key == K_UP:
-                up = False
-            if e.type == KEYUP and e.key == K_RIGHT:
-                right = False
-            if e.type == KEYUP and e.key == K_LEFT:
-                left = False
-            if e.type == KEYUP and e.key == K_DOWN:
-                down = False
-
+                return(0)
+            
         screen.blit(bg, (0,0))       
-
+        
         camera.update(Cam1) 
-        Cam1.update(left, right, up, down)
+        Cam1.update(left, right, up, down, abs(mos.relx), abs(mos.rely))
+        
         for e in entities:
             screen.blit(e.image, camera.apply(e))
          

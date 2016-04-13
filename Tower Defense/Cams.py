@@ -19,27 +19,27 @@ class Cams(sprite.Sprite):
         self.rect = Rect(x, y, WIDTH, HEIGHT) 
         self.image.set_colorkey(Color(COLOR)) 
 
-    def update(self, left, right, up, down):
-        if self.rect.x > 1972 - 400:
+    def update(self, left, right, up, down, MOVE_SPEED_X, MOVE_SPEED_Y):
+        if self.rect.x > 1600 - 400:
             right = False
         if self.rect.x < 0 + 400:
             left = False
-        if self.rect.y < 0 + 320:
+        if self.rect.y < 0 + 400:
             up = False
-        if self.rect.y > 768 - 320:
+        if self.rect.y > 1600 - 400:
             down = False
             
         if up:
-            self.yvel = -MOVE_SPEED
+            self.yvel = -MOVE_SPEED_Y
 
         if down:
-            self.yvel = MOVE_SPEED     
+            self.yvel = MOVE_SPEED_Y     
                        
         if left:
-            self.xvel = -MOVE_SPEED
+            self.xvel = -MOVE_SPEED_X
  
         if right:
-            self.xvel = MOVE_SPEED 
+            self.xvel = MOVE_SPEED_X
          
         if not(left or right): 
             self.xvel = 0
