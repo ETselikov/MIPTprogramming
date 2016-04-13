@@ -1,3 +1,3 @@
-Folder for my project
+Tower Defense
 
-I'm going to create Tower Defense game
+This is a game where you shoudn't let enemies get into your city by building towers which can damage them.

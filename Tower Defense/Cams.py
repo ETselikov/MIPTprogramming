@@ -1,5 +1,4 @@
 from pygame import *
-from towerdef import*
 import os
 
 MOVE_SPEED = 7
