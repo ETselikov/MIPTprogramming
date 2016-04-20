@@ -1,4 +1,4 @@
-import pygame, time, Camera_Moving
+import pygame, time
 from Camera_Moving import *
 from Scene import *
 from Transparent import *
@@ -67,20 +67,19 @@ class HideScene(ShowScene):
 
 class Menu:
     def __init__(self, position = (0,0), loop = True):
-        self.index = 0
+        self.index = None
         self.x = position[0]
         self.y = position[1]
         self.menu = list()
 
-    def down(self):
-        self.index += 1
-        if self.index >= len(self.menu):
-            self.index = 0
+    def first(self):
+        self.index = 0
 
-    def up(self):
-        self.index -= 1
-        if self.index < 0:
-            self.index = len(self.menu)-1
+    def second(self):
+        self.index = 1
+
+    def none(self):
+        self.index = None
 
     def add_menu_item(self, no_select, select, func):
         self.menu.append({ 'no select' : no_select, 'select' : select, 'func' : func })
@@ -105,19 +104,20 @@ class MenuScene(Scene):
     def New_Game(self):
         self.the_end()
         self.set_next_scene(GameScene())
+        pygame.event.post(pygame.event.Event(const.END_SCENE))
 
     def Exit_Game(self):
-        self.the_end()
         self.set_next_scene(None)
+        self.the_end()
 
     def Settings(self):
-        self.the_end()
         self.set_next_scene(None)
+        self.the_end()
         
     def _start(self):
-        self.menu = Menu((330,300))
+        self.menu = Menu((500,600))
         font      = pygame.font.SysFont("Monospace", 40, bold = False, italic = False)
-        font_bold = pygame.font.SysFont("Monospace", 40, bold = True, italic = False)
+        font_bold = pygame.font.SysFont("Monospace", 40, bold = True, italic = True)
         item = u"Новая игра"
         self.menu.add_menu_item(font.render(item, True, (0, 0, 0)),
                                 font_bold.render(item, True, (0, 0, 0)),
@@ -132,14 +132,22 @@ class MenuScene(Scene):
                                 self.Exit_Game)
 
     def _event(self, event):
+        (mosx, mosy) = pygame.mouse.get_pos()
         for e in event.get():
-            if e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_DOWN:
-                    self.menu.down()
-                elif e.key == pygame.K_UP:
-                    self.menu.up()
-                elif e.key == pygame.K_RETURN:
+            if mosx > 500 and mosx < 750 and mosy > 600 and mosy < 640:
+                self.menu.first()
+                if e.type == MOUSEBUTTONDOWN and e.button == 1:
                     self.menu.call()
+            elif mosx > 500 and mosx < 620 and mosy > 660 and mosy < 685:
+                self.menu.second()
+                if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                    self.menu.call()
+            else:
+                self.menu.none()
+            if e.type == QUIT:
+                self.the_end()
+                self.set_next_scene(None)           
+            
     def _draw(self, dt):
         self.display.fill((255,255,255))
         self.menu.draw(self.display)
@@ -177,14 +185,13 @@ class GameScene(Scene):
         total_level_width  = len(level[0])*BLOCK_WIDTH 
         total_level_height = len(level)*BLOCK_HEIGHT   
         
-        self.Cam1 = Cams(int(total_level_width/4),int(total_level_height/4)) 
+        self.Cam1 = Cams(int(total_level_width/2),int(total_level_height/2)) 
         self.left = self.right = False 
         self.up = self.down = False
         self.entities.add(self.Cam1)
         
         self.camera = Camera(camera_configure, total_level_width, total_level_height) 
         
-        pygame.mouse.set_pos(int(total_level_width/4),int(total_level_height/4))
         self.mos = Mouse(relx, rely)
     def _event(self, event):
         self.timer.tick(60)
