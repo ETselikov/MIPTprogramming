@@ -5,6 +5,7 @@ from Transparent import *
 from pygame import *
 from Cams import *
 from Blocks import *
+from Enemies import*
 
 
 relx = rely = 0
@@ -154,6 +155,7 @@ class MenuScene(Scene):
 
 class GameScene(Scene):
     def _start(self):
+        self.k = 0
         self.timer = pygame.time.Clock()
         self.screen = pygame.display.set_mode(DISPLAY) 
         pygame.display.set_caption("Tower Defense") 
@@ -161,6 +163,7 @@ class GameScene(Scene):
         self.entities = pygame.sprite.Group() 
         self.roads = []
         self.buildzones = []
+        self.enemies = []
         
 
         f = open('Level.txt', 'r')
@@ -181,6 +184,7 @@ class GameScene(Scene):
                 x += BLOCK_WIDTH 
             y += BLOCK_HEIGHT    
             x = 0                   
+
         
         total_level_width  = len(level[0])*BLOCK_WIDTH 
         total_level_height = len(level)*BLOCK_HEIGHT   
@@ -217,11 +221,20 @@ class GameScene(Scene):
                 if e.key == K_ESCAPE:
                     self.the_end()
                     self.set_next_scene(MenuScene())  
+
     def _draw(self, dt):
         self.screen.blit(self.bg, (0,0))       
+
+        if self.k % 300 == 0:
+            self.en = Enemy1(0,64)
+            self.entities.add(self.en)
+            self.enemies.append(self.en)
+        self.k += 1
             
         self.camera.update(self.Cam1) 
         self.Cam1.update(self.left, self.right, self.up, self.down, abs(self.mos.relx), abs(self.mos.rely))
+        for i in self.enemies:
+            i.update(self.buildzones)
             
         for e in self.entities:
             self.screen.blit(e.image, self.camera.apply(e))
