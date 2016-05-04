@@ -20,6 +20,14 @@ class Build_Zone(sprite.Sprite):
         sprite.Sprite.__init__(self)
         self.image = Surface((BLOCK_WIDTH, BLOCK_HEIGHT))
         self.image.fill(Color(BZ_COLOR))
-        self.image = image.load("%s/images/blocks/grass.png" % ICON_DIR)        
+        self.image = image.load("%s/images/blocks/grass.png" % ICON_DIR)
+        self.rect = Rect(x, y, BLOCK_WIDTH, BLOCK_HEIGHT)
+
+class Selected(sprite.Sprite):
+    def __init__(self, x, y):
+        sprite.Sprite.__init__(self)
+        self.image = Surface((BLOCK_WIDTH, BLOCK_HEIGHT))
+        self.image.fill(Color(BZ_COLOR))
+        self.image = image.load("%s/images/selection.png" % ICON_DIR)
         self.rect = Rect(x, y, BLOCK_WIDTH, BLOCK_HEIGHT)
 

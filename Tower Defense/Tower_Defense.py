@@ -5,7 +5,8 @@ from Transparent import *
 from pygame import *
 from Cams import *
 from Blocks import *
-from Enemies import*
+from Enemies import *
+from Towers import *
 
 
 relx = rely = 0
@@ -160,11 +161,12 @@ class GameScene(Scene):
         self.screen = pygame.display.set_mode(DISPLAY) 
         pygame.display.set_caption("Tower Defense") 
         self.bg = Surface((800,800))
-        self.entities = pygame.sprite.Group() 
-        self.roads = []
-        self.buildzones = []
-        self.enemies = []
-        
+        self.entities = pygame.sprite.Group()
+        self.rdgr = pygame.sprite.Group()
+        self.bzgr = pygame.sprite.Group()
+        self.engr = pygame.sprite.Group()
+        self.selection = pygame.sprite.Group()
+        self.towers = pygame.sprite.Group()
 
         f = open('Level.txt', 'r')
         level = f.readlines()
@@ -175,11 +177,11 @@ class GameScene(Scene):
                 if col == "#":
                     ro = Road(x,y)
                     self.entities.add(ro)
-                    self.roads.append(ro)
+                    self.rdgr.add(ro)
                 if col == " ":
                     bz = Build_Zone(x,y)
                     self.entities.add(bz)
-                    self.buildzones.append(bz)
+                    self.bzgr.add(bz)
                     
                 x += BLOCK_WIDTH 
             y += BLOCK_HEIGHT    
@@ -192,11 +194,15 @@ class GameScene(Scene):
         self.Cam1 = Cams(int(total_level_width/2),int(total_level_height/2)) 
         self.left = self.right = False 
         self.up = self.down = False
-        self.entities.add(self.Cam1)
         
         self.camera = Camera(camera_configure, total_level_width, total_level_height) 
         
         self.mos = Mouse(relx, rely)
+
+        (self.cursor_posx, self.cursor_posy) = mouse.get_pos()
+        self.cursor = Cursor(self.cursor_posx, self.cursor_posy)
+        
+
     def _event(self, event):
         self.timer.tick(60)
             
@@ -213,6 +219,14 @@ class GameScene(Scene):
         if self.mos.rely < 0:
             self.up = True
             self.down = False
+
+        (self.cursor_posx, self.cursor_posy) = mouse.get_pos()
+        self.cursor.update(self.cursor_posx + self.Cam1.rect.x - 400, self.cursor_posy + self.Cam1.rect.y - 400)
+        for c in self.bzgr:
+            if sprite.collide_rect(self.cursor, c):
+                self.select = Selected(c.rect.x, c.rect.y)
+                self.selection.add(self.select)
+        
         for e in pygame.event.get(): 
             if e.type == QUIT:
                 self.the_end()
@@ -220,26 +234,48 @@ class GameScene(Scene):
             if e.type == KEYDOWN:
                 if e.key == K_ESCAPE:
                     self.the_end()
-                    self.set_next_scene(MenuScene())  
+                    self.set_next_scene(MenuScene())
+            if e.type == MOUSEBUTTONDOWN:
+                self.tower = Tower1(self.select.rect.x - 32, self.select.rect.y - 32)
+                self.towers.add(self.tower)
 
-    def _draw(self, dt):
-        self.screen.blit(self.bg, (0,0))       
-
-        if self.k % 300 == 0:
+    def _draw(self, dt):       
+        if self.k % 500 == 0:
             self.en = Enemy1(0,64)
             self.entities.add(self.en)
-            self.enemies.append(self.en)
+            self.engr.add(self.en)
         self.k += 1
+
+        for e in self.engr:
+            if e.turn[e.k] == 'c' or e.death:
+                self.engr.remove(e)
+            
             
         self.camera.update(self.Cam1) 
         self.Cam1.update(self.left, self.right, self.up, self.down, abs(self.mos.relx), abs(self.mos.rely))
-        for i in self.enemies:
-            i.update(self.buildzones)
+        for i in self.engr:
+            i.update(self.bzgr, self.towers)
             
-        for e in self.entities:
+        for e in self.bzgr:
             self.screen.blit(e.image, self.camera.apply(e))
-             
-        pygame.display.update()
+        for e in self.rdgr:
+            self.screen.blit(e.image, self.camera.apply(e))
+        for e in self.towers:
+            self.screen.blit(e.image, self.camera.apply(e))
+        for e in self.engr:
+            self.screen.blit(e.image, self.camera.apply(e))
+        for e in self.selection:
+            self.screen.blit(e.image, self.camera.apply(e))
+            self.selection.remove(e)
+            
+class Cursor(sprite.Sprite):
+    def __init__(self, x, y):
+        sprite.Sprite.__init__(self)
+        self.image = Surface((1,1))
+        self.rect = Rect(x, y, 1, 1)
+    def update(self, x, y):
+        self.rect.x = x
+        self.rect.y = y
 
 class Camera(object):
     def __init__(self, camera_func, width, height):
