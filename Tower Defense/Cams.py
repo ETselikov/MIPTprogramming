@@ -25,7 +25,7 @@ class Cams(sprite.Sprite):
             left = False
         if self.rect.y < 0 + 400:
             up = False
-        if self.rect.y > 1600 - 400:
+        if self.rect.y > 1696 - 400:
             down = False
             
         if up:
