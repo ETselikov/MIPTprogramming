@@ -7,7 +7,7 @@ EN_COLOR = "#E61793"
 ICON_DIR = os.path.dirname(__file__)
 
 class Enemy(sprite.Sprite):
-    def update(self, buildzones, towers, castle):
+    def update(self, buildzones, damage_towers, slow_towers, castle):
         if self.up:
             self.yvel = -self.speed
 
@@ -26,12 +26,12 @@ class Enemy(sprite.Sprite):
             self.yvel = 0
             
         self.rect.y += self.yvel
-        self.collide(buildzones, towers, castle)
+        self.collide(buildzones, damage_towers, slow_towers, castle)
         
         self.rect.x += self.xvel
-        self.collide(buildzones, towers, castle)
+        self.collide(buildzones, damage_towers, slow_towers, castle)
         
-    def collide(self, buildzones, towers, castle):
+    def collide(self, buildzones, damage_towers, slow_towers, castle):
         for c in buildzones:
             if sprite.collide_rect(self, c):
                 if self.right:                      
@@ -60,11 +60,14 @@ class Enemy(sprite.Sprite):
                     self.down = True
                 self.k = self.k + 1
                 
-        for c in towers:
+        for c in damage_towers:
             if sprite.collide_rect(self, c):
                 self.hp = self.hp - c.damage
                 if self.hp == 0:
                     self.death = True
+        for c in slow_towers:
+            if sprite.collide_rect(self, c):
+                self.speed = self.abs_speed / c.slow
         if sprite.collide_rect(self, castle):
             castle.hp = castle.hp - self.damage
             self.castle = True
@@ -81,8 +84,9 @@ class Enemy1(Enemy):
         self.k = 0
         self.death = False
         self.castle = False
-        
-        self.speed = 2
+
+        self.abs_speed = 2
+        self.speed = self.abs_speed
         self.hp = 1000
         self.cost = 75
         self.damage = 75
@@ -99,8 +103,9 @@ class Enemy2(Enemy):
         self.k = 0
         self.death = False
         self.castle = False
-        
-        self.speed = 4
+
+        self.abs_speed = 4
+        self.speed = self.abs_speed
         self.hp = 5000
         self.cost = 200
         self.damage = 200
@@ -117,8 +122,9 @@ class Enemy3(Enemy):
         self.k = 0
         self.death = False
         self.castle = False
-        
-        self.speed = 7
+
+        self.abs_speed = 8
+        self.speed = self.abs_speed
         self.hp = 10000
         self.cost = 1000
         self.damage = 1000
@@ -135,8 +141,9 @@ class BOSS(Enemy):
         self.k = 0
         self.death = False
         self.castle = False
-        
-        self.speed = 3
+
+        self.abs_speed = 4
+        self.speed = self.abs_speed
         self.hp = 200000
         self.cost = 0
         self.damage = self.hp

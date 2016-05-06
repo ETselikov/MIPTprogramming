@@ -21,11 +21,11 @@ class Cams(sprite.Sprite):
     def update(self, left, right, up, down, MOVE_SPEED_X, MOVE_SPEED_Y):
         if self.rect.x > 1600 - 400:
             right = False
-        if self.rect.x < 0 + 400:
+        if self.rect.x < 32 + 400:
             left = False
         if self.rect.y < 0 + 400:
             up = False
-        if self.rect.y > 1696 - 400:
+        if self.rect.y > 1632 - 400:
             down = False
             
         if up:

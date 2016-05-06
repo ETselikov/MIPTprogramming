@@ -30,3 +30,8 @@ class Selected(sprite.Sprite):
         self.image = image.load("%s/images/selection.png" % ICON_DIR)
         self.rect = Rect(x, y, BLOCK_WIDTH, BLOCK_HEIGHT)
 
+class Built(sprite.Sprite):
+    def __init__(self, x, y):
+        sprite.Sprite.__init__(self)
+        self.image = image.load("%s/images/blocks/built.png" % ICON_DIR)
+        self.rect = Rect(x, y, BLOCK_WIDTH, BLOCK_HEIGHT)

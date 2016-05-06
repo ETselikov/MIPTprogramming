@@ -123,6 +123,7 @@ class Game_Scene(Scene):
     def _start(self):
         self.money = 1000
         self.k = 0
+        self.tower_type = None
         self.timer = pygame.time.Clock()
         self.screen = pygame.display.set_mode(DISPLAY) 
         pygame.display.set_caption("Tower Defense")
@@ -134,17 +135,24 @@ class Game_Scene(Scene):
         self.engr = pygame.sprite.Group()
         self.selection = pygame.sprite.Group()
         self.towers = pygame.sprite.Group()
-        self.interface = pygame.sprite.Group()
+        self.towers_damage = pygame.sprite.Group()
+        self.towers_slow = pygame.sprite.Group()
+        self.built = pygame.sprite.Group()
+        self.icons = pygame.sprite.Group()
         self.building = None
+        self.tower = None
         self.BOSS = False
-
-        f = open('Level.txt', 'r')
-        level = f.readlines()
+        self.select_icon = Select_Icon(0, 0)
 
         self.font = pygame.font.SysFont("Monospace", 25, bold = False, italic = False)
-        frame = Frame(0, 0)
-        self.interface.add(frame)
-           
+        self.frame = Frame(0, 0)
+        
+        self.icon1 = Icon1(70, 690)
+        self.icon2 = Icon2(290, 690)
+        self.icon3 = Icon3(510, 690)
+        
+        f = open('Level.txt', 'r')
+        level = f.readlines()   
         x = y = 0 
         for row in level: 
             for col in row: 
@@ -162,25 +170,23 @@ class Game_Scene(Scene):
                     self.rdgr.add(self.castle)
                 
                 x += BLOCK_WIDTH 
-            y += BLOCK_HEIGHT    
+            y += BLOCK_HEIGHT   
             x = 0                   
 
-        
         total_level_width  = len(level[0])*BLOCK_WIDTH 
         total_level_height = len(level)*BLOCK_HEIGHT   
         
-        self.Cam1 = Cams(int(total_level_width/2),int(total_level_height/2)) 
+        self.Cam1 = Cams(int(800),int(816)) 
         self.left = self.right = False 
         self.up = self.down = False
         
-        self.camera = Camera(camera_configure, total_level_width, total_level_height) 
+        self.camera = Camera(camera_configure, 1600, 1632) 
         
         self.mos = Mouse(relx, rely)
 
         (self.cursor_posx, self.cursor_posy) = mouse.get_pos()
         self.cursor = Cursor(self.cursor_posx, self.cursor_posy)
         
-
     def _event(self, event):
         self.timer.tick(60)
             
@@ -208,10 +214,12 @@ class Game_Scene(Scene):
         for c in self.rdgr:
             if sprite.collide_rect(self.cursor, c):
                 self.building = None
-        for c in self.towers:
+        for c in self.built:
             if sprite.collide_rect(self.cursor, c):
                 self.building = None
         if sprite.collide_rect(self.cursor, self.castle):
+                self.building = None
+        if sprite.collide_rect(self.cursor, self.frame):
                 self.building = None
                 
         for e in pygame.event.get():
@@ -227,14 +235,44 @@ class Game_Scene(Scene):
                     pygame.mixer.music.play(-1)
                     self.the_end()
                     self.set_next_scene(Main_Menu_Scene())
+                    
             if e.type == MOUSEBUTTONDOWN and e.button == 1 and self.building != None:
-                tower = Tower1(self.building.rect.x - 32, self.building.rect.y - 32)
-                if self.money >= tower.cost:
-                    self.towers.add(tower)
+                if self.tower_type == 1:
+                    self.tower = Tower1(self.building.rect.x - 32, self.building.rect.y - 32)
+                if self.tower_type == 2:
+                    self.tower = Tower2(self.building.rect.x - 64, self.building.rect.y - 64)
+                if self.tower_type == 3:
+                    self.tower = Tower3(self.building.rect.x - 64, self.building.rect.y - 64)
+                if self.tower != None and self.money >= self.tower.cost:
+                    BUILT = Built(self.building.rect.x, self.building.rect.y)
+                    self.built.add(BUILT)
+                    self.towers.add(self.tower)
                     self.building = None
-                    self.money = self.money - tower.cost
+                    self.money = self.money - self.tower.cost
+                    if self.tower_type == 1 or self.tower_type == 3:
+                        self.towers_damage.add(self.tower)
+                    if self.tower_type == 2:
+                        self.towers_slow.add(self.tower)
 
-    def _draw(self, dt):       
+            if e.type == MOUSEBUTTONDOWN and e.button == 3:        
+                if sprite.collide_rect(self.cursor, self.icon1):
+                    self.tower_type = 1
+
+                if sprite.collide_rect(self.cursor, self.icon2):
+                    self.tower_type = 2
+
+                if sprite.collide_rect(self.cursor, self.icon3):
+                    self.tower_type = 3
+
+
+    def _draw(self, dt):
+        self.icon1 = Icon1(70 + self.Cam1.rect.x - 400, 690 + self.Cam1.rect.y - 400)
+        self.icons.add(self.icon1)
+        self.icon2 = Icon2(290 + self.Cam1.rect.x - 400, 690 + self.Cam1.rect.y - 400)
+        self.icons.add(self.icon2)
+        self.icon3 = Icon3(510 + self.Cam1.rect.x - 400, 690 + self.Cam1.rect.y - 400)
+        self.icons.add(self.icon3)
+        
         if self.k > 0 and self.k < 30000:
             if self.k % 400 == 0:
                 self.en = Enemy1(0,96)
@@ -284,7 +322,7 @@ class Game_Scene(Scene):
         self.camera.update(self.Cam1) 
         self.Cam1.update(self.left, self.right, self.up, self.down, abs(self.mos.relx), abs(self.mos.rely))
         for i in self.engr:
-            i.update(self.bzgr, self.towers, self.castle)
+            i.update(self.bzgr, self.towers_damage, self.towers_slow, self.castle)
             
         for e in self.bzgr:
             self.screen.blit(e.image, self.camera.apply(e))
@@ -294,11 +332,24 @@ class Game_Scene(Scene):
             self.screen.blit(e.image, self.camera.apply(e))
         for e in self.engr:
             self.screen.blit(e.image, self.camera.apply(e))
+        for e in self.built:
+            self.screen.blit(e.image, self.camera.apply(e))
         for e in self.selection:
             self.screen.blit(e.image, self.camera.apply(e))
             self.selection.remove(e)
-        for i in self.interface:
-            self.screen.blit(i.image, (0, 0))
+        self.screen.blit(self.frame.image, (self.frame.rect.x, self.frame.rect.y))
+        self.screen.blit(self.icon1.image, (70, 690))
+        self.icons.remove(self.icon1)
+        self.screen.blit(self.icon2.image, (290, 690))
+        self.icons.remove(self.icon1)
+        self.screen.blit(self.icon3.image, (510, 690))
+        self.icons.remove(self.icon1)
+        if self.tower_type == 1:
+            self.screen.blit(self.select_icon.image, (70, 690))
+        if self.tower_type == 2:
+            self.screen.blit(self.select_icon.image, (290, 690))
+        if self.tower_type == 3:
+            self.screen.blit(self.select_icon.image, (510, 690))
         self.screen.blit(self.font.render("Money = " + str(self.money), True, (255, 226, 0)), (575, 1))
         self.screen.blit(self.font.render("Castle hp = " + str(self.castle.hp), True, (0 + (100000 - self.castle.hp)/395, 255 - (100000 - self.castle.hp)/395, 0)), (10, 1))
         if self.BOSS:
@@ -336,9 +387,6 @@ def camera_configure(camera, target_rect):
 
     return Rect(l, t, w, h)        
 
-def text_objects(text, font):
-    textSurface = font.render(text, True, (0,0,0))
-    return textSurface, textSurface.get_rect()
 class Game():
     def __init__(self, width, height, color , scene   = None):
         pygame.init()       
