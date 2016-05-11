@@ -1,7 +1,7 @@
 import pygame
 
 class Transparent:
-    def __init__(self, time = 2000, show = True):
+    def __init__(self, time, show = True):
         self.show = show
         self.set_time(time)
         self.run = False
@@ -27,7 +27,7 @@ class Transparent:
     def stop(self):
         self.run = False
 
-    def set_time(self, time = 2000):
+    def set_time(self, time):
         self.time = float(255)/float(time)
 
     def get_sprite(self,sprite):

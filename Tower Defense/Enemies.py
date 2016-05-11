@@ -25,10 +25,9 @@ class Enemy(sprite.Sprite):
         if not(self.up or self.down):
             self.yvel = 0
             
-        self.rect.y += self.yvel
-        self.collide(buildzones, damage_towers, slow_towers, castle)
-        
+        self.rect.y += self.yvel        
         self.rect.x += self.xvel
+        self.speed = self.abs_speed
         self.collide(buildzones, damage_towers, slow_towers, castle)
         
     def collide(self, buildzones, damage_towers, slow_towers, castle):
@@ -63,14 +62,17 @@ class Enemy(sprite.Sprite):
         for c in damage_towers:
             if sprite.collide_rect(self, c):
                 self.hp = self.hp - c.damage
-                if self.hp == 0:
+                if self.hp < 0:
                     self.death = True
         for c in slow_towers:
             if sprite.collide_rect(self, c):
-                self.speed = self.abs_speed / c.slow
+                if self.speed > 1:
+                    self.speed = self.speed / c.slow
         if sprite.collide_rect(self, castle):
+            self.damage = self.hp
             castle.hp = castle.hp - self.damage
             self.castle = True
+        
 
 class Enemy1(Enemy):
     def __init__(self, x, y):
@@ -87,9 +89,9 @@ class Enemy1(Enemy):
 
         self.abs_speed = 2
         self.speed = self.abs_speed
-        self.hp = 1000
+        self.hp = 500
         self.cost = 75
-        self.damage = 75
+        self.damage = 500
 
 class Enemy2(Enemy):
     def __init__(self, x, y):
@@ -106,9 +108,9 @@ class Enemy2(Enemy):
 
         self.abs_speed = 4
         self.speed = self.abs_speed
-        self.hp = 5000
+        self.hp = 2500
         self.cost = 200
-        self.damage = 200
+        self.damage = 500
 
 class Enemy3(Enemy):
     def __init__(self, x, y):

@@ -12,7 +12,6 @@ class Frame(sprite.Sprite):
 class Background(sprite.Sprite):
     def __init__(self, x, y):
         sprite.Sprite.__init__(self)
-        self.image = image.load("%s/images/interface/Menu_Background.png" % ICON_DIR) 
         self.rect = Rect(x, y, 800, 800)
 
 class Icon1(sprite.Sprite):
