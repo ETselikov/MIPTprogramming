@@ -1,0 +1,5 @@
+To start the game run Tower_Defence.py
+If you don't want to watch the intro press Esc
+Press "Start game" or "Exit" to exit
+Press right mouse button to chose tower type and left mouse button to build it
+During the game press Esc to quit to menu

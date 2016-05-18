@@ -28,14 +28,14 @@ class Transparent:
         self.run = False
 
     def set_time(self, time):
-        self.time = float(255)/float(time)
+        self.time = float(255) / float(time)
 
     def get_sprite(self,sprite):
         sprite_copy = sprite.copy()
         if self.show:
-            sprite_copy.fill((0,0,0,255-self.count), None, pygame.BLEND_RGBA_SUB)
+            sprite_copy.fill((0, 0, 0, 255 - self.count), None, pygame.BLEND_RGBA_SUB)
         else:
-            sprite_copy.fill((0,0,0,self.count), None, pygame.BLEND_RGBA_SUB)
+            sprite_copy.fill((0, 0, 0, self.count), None, pygame.BLEND_RGBA_SUB)
         return sprite_copy
 
     def toggle(self):

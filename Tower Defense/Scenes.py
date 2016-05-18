@@ -50,7 +50,7 @@ class Show_Scene(Scene):
         self.plambir.update(dt)
 
     def _draw(self, dt):
-        self.display.fill((255,255,255))
+        self.display.fill((255, 255, 255))
         self.display.blit(self.plambir.get_sprite(self.sprite),
                           get_center(self.display.get_rect(),
                                      self.sprite.get_rect()))
@@ -110,14 +110,14 @@ class Main_Menu_Scene(Scene):
     def _start(self):
         self.bg = Background(0, 0)
         self.bg.image = image.load("%s/images/interface/Menu_Background.png" % DIR) 
-        self.menu = Menu((500,550))
+        self.menu = Menu((500, 550))
         font      = pygame.font.SysFont("Monospace", 40, bold = False, italic = False)
         font_bold = pygame.font.SysFont("Monospace", 40, bold = True, italic = True)
-        item = u"Новая игра"
+        item = u"Start game"
         self.menu.add_menu_item(font.render(item, True, (0, 0, 0)),
                                 font_bold.render(item, True, (0, 0, 0)),
                                 self.New_Game)
-        item = u"Выход"
+        item = u"Exit"
         self.menu.add_menu_item(font.render(item, True, (0, 0, 0)),
                                 font_bold.render(item, True,(0, 0, 0)),
                                 self.Exit_Game)
@@ -125,12 +125,12 @@ class Main_Menu_Scene(Scene):
     def _event(self, event):
         (mosx, mosy) = pygame.mouse.get_pos()
         for e in event.get():
-            if mosx > 500 and mosx < 750 and mosy > 550 and mosy < 590:
+            if mosx > 500 and mosx < 745 and mosy > 550 and mosy < 590:
                 self.menu.index = 0
                 if e.type == MOUSEBUTTONDOWN and e.button == 1:
                     pygame.mixer.music.stop()
                     self.menu.call()
-            elif mosx > 500 and mosx < 620 and mosy > 600 and mosy < 640:
+            elif mosx > 500 and mosx < 605 and mosy > 600 and mosy < 640:
                 self.menu.index = 1
                 if e.type == MOUSEBUTTONDOWN and e.button == 1:
                     pygame.mixer.music.stop()
@@ -147,19 +147,31 @@ class Main_Menu_Scene(Scene):
         self.menu.draw(self.display)
 
 def get_center(surface, sprite):
-    return (surface.w/2 - sprite.w/2,
-            surface.h/2 - sprite.h/2)
+    return (surface.w / 2 - sprite.w / 2,
+            surface.h / 2 - sprite.h / 2)
 
 class Game_Scene(Scene):
     def _start(self):
+        f = open('Level.txt', 'r')
+        level = f.readlines() 
+        
         self.money = 1200
         self.k = 0
         self.tower_type = None
+        self.building = None
+        self.tower = None
+        self.BOSS = False 
+        self.left = self.right = False 
+        self.up = self.down = False
+        
         self.timer = pygame.time.Clock()
-        self.screen = pygame.display.set_mode(DISPLAY) 
+        
+        self.screen = pygame.display.set_mode(DISPLAY)
+        
         pygame.display.set_caption("Tower Defense")
         pygame.mixer.music.load("%s/sounds/Game.mp3" % DIR)
         pygame.mixer.music.play(-1)
+        
         self.entities = pygame.sprite.Group()
         self.rdgr = pygame.sprite.Group()
         self.bzgr = pygame.sprite.Group()
@@ -170,20 +182,19 @@ class Game_Scene(Scene):
         self.towers_slow = pygame.sprite.Group()
         self.built = pygame.sprite.Group()
         self.icons = pygame.sprite.Group()
-        self.building = None
-        self.tower = None
-        self.BOSS = False
-        self.select_icon = Select_Icon(0, 0)
 
         self.font = pygame.font.SysFont("Monospace", 25, bold = False, italic = False)
+
         self.frame = Frame(0, 0)
-        
         self.icon1 = Icon1(70, 690)
         self.icon2 = Icon2(290, 690)
         self.icon3 = Icon3(510, 690)
-        
-        f = open('Level.txt', 'r')
-        level = f.readlines()   
+        self.select_icon = Select_Icon(0, 0)
+
+        self.mos = Mouse(relx, rely)
+        (self.cursor_posx, self.cursor_posy) = mouse.get_pos()
+        self.cursor = Cursor(self.cursor_posx, self.cursor_posy)
+
         x = y = 0 
         for row in level: 
             for col in row: 
@@ -199,33 +210,24 @@ class Game_Scene(Scene):
                     self.castle = Castle(x,y)
                     self.entities.add(self.castle)
                     self.rdgr.add(self.castle)
-                
                 x += BLOCK_WIDTH 
             y += BLOCK_HEIGHT   
-            x = 0                   
-
+            x = 0               
+        
         total_level_width  = len(level[0])*BLOCK_WIDTH 
-        total_level_height = len(level)*BLOCK_HEIGHT   
+        total_level_height = len(level)*BLOCK_HEIGHT
         
-        self.Cam1 = Cams(int(800),int(816)) 
-        self.left = self.right = False 
-        self.up = self.down = False
-        
-        self.camera = Camera(camera_configure, 1600, 1632) 
-        
-        self.mos = Mouse(relx, rely)
-
-        (self.cursor_posx, self.cursor_posy) = mouse.get_pos()
-        self.cursor = Cursor(self.cursor_posx, self.cursor_posy)
+        self.Cam1 = Cams(int(total_level_width / 2),int(total_level_height / 2))
+        self.camera = Camera(camera_configure, total_level_width, total_level_height) 
         
     def _event(self, event):
         self.timer.tick(60)
 
         self.icon1 = Icon1(70 + self.Cam1.rect.x - 400, 690 + self.Cam1.rect.y - 400)
-        self.icons.add(self.icon1)
         self.icon2 = Icon2(290 + self.Cam1.rect.x - 400, 690 + self.Cam1.rect.y - 400)
-        self.icons.add(self.icon2)
         self.icon3 = Icon3(510 + self.Cam1.rect.x - 400, 690 + self.Cam1.rect.y - 400)
+        self.icons.add(self.icon1)
+        self.icons.add(self.icon2)
         self.icons.add(self.icon3)
             
         self.mos.update(self.Cam1.rect.x, self.Cam1.rect.y)
@@ -241,9 +243,9 @@ class Game_Scene(Scene):
         if self.mos.rely < 0:
             self.up = True
             self.down = False
-
         (self.cursor_posx, self.cursor_posy) = mouse.get_pos()
         self.cursor.update(self.cursor_posx + self.Cam1.rect.x - 400, self.cursor_posy + self.Cam1.rect.y - 400)
+
         for c in self.bzgr:
             if sprite.collide_rect(self.cursor, c):
                 self.select = Selected(c.rect.x, c.rect.y)
@@ -276,6 +278,7 @@ class Game_Scene(Scene):
                 pygame.mixer.music.stop()
                 self.the_end()
                 self.set_next_scene(None)
+                pygame.quit()
 
             if e.type == KEYDOWN:
                 if e.key == K_ESCAPE:
@@ -317,38 +320,38 @@ class Game_Scene(Scene):
     def _draw(self, dt):        
         if self.k > 0 and self.k < 30000:
             if self.k % 400 == 0:
-                self.en = Enemy1(0,96)
+                self.en = Enemy1(0, 96)
                 self.entities.add(self.en)
                 self.engr.add(self.en)
         if self.k >= 5000 and self.k < 30000:
             if self.k % 200 == 0:
-                self.en = Enemy1(0,96)
+                self.en = Enemy1(0, 96)
                 self.entities.add(self.en)
                 self.engr.add(self.en)
         if self.k >= 8000 and self.k < 30000:
             if self.k % 300 == 0:
-                self.en = Enemy2(0,96)
+                self.en = Enemy2(0, 96)
                 self.entities.add(self.en)
                 self.engr.add(self.en)
         if self.k >= 15000 and self.k < 30000:
             if self.k % 500 == 0:
-                self.en = Enemy3(0,96)
+                self.en = Enemy3(0, 96)
                 self.entities.add(self.en)
                 self.engr.add(self.en)
             if self.k % 200 == 0:
-                self.en = Enemy2(0,96)
+                self.en = Enemy2(0, 96)
                 self.entities.add(self.en)
                 self.engr.add(self.en)
         if self.k >= 25000 and self.k < 30000:
             if self.k % 200 == 0:
-                self.en = Enemy3(0,96)
+                self.en = Enemy3(0, 96)
                 self.entities.add(self.en)
                 self.engr.add(self.en)
         if self.k == 30000:
             pygame.mixer.music.stop()
             pygame.mixer.music.load("%s/sounds/BOSS.mp3" % DIR)
             pygame.mixer.music.play(-1)
-            self.boss = BOSS(0,96)
+            self.boss = BOSS(0, 96)
             self.entities.add(self.boss)
             self.engr.add(self.boss)
             self.BOSS = True
@@ -381,16 +384,11 @@ class Game_Scene(Scene):
             self.screen.blit(e.image, self.camera.apply(e))
             self.selection.remove(e)
             del e
+
         self.screen.blit(self.frame.image, (self.frame.rect.x, self.frame.rect.y))
         self.screen.blit(self.icon1.image, (70, 690))
-        self.icons.remove(self.icon1)
-        del self.icon1
         self.screen.blit(self.icon2.image, (290, 690))
-        self.icons.remove(self.icon2)
-        del self.icon2
         self.screen.blit(self.icon3.image, (510, 690))
-        self.icons.remove(self.icon3)
-        del self.icon3
         if self.tower_type == 1:
             self.screen.blit(self.select_icon.image, (70, 690))
         if self.tower_type == 2:
@@ -405,10 +403,17 @@ class Game_Scene(Scene):
         if self.BOSS:
             self.screen.blit(self.font.render("BOSS hp = " + str(self.boss.hp), True, (255, 255, 255)), (300, 1))
 
+        self.icons.remove(self.icon1)
+        self.icons.remove(self.icon2)
+        self.icons.remove(self.icon3)
+        del self.icon1
+        del self.icon2
+        del self.icon3
+        
 class Cursor(sprite.Sprite):
     def __init__(self, x, y):
         sprite.Sprite.__init__(self)
-        self.image = Surface((1,1))
+        self.image = Surface((1, 1))
         self.rect = Rect(x, y, 1, 1)
     def update(self, x, y):
         self.rect.x = x

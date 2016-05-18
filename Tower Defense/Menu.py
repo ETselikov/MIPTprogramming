@@ -1,5 +1,5 @@
 class Menu:
-    def __init__(self, position = (0,0), loop = True):
+    def __init__(self, position = (0, 0), loop = True):
         self.index = None
         self.x = position[0]
         self.y = position[1]

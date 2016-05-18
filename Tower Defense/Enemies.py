@@ -10,13 +10,10 @@ class Enemy(sprite.Sprite):
     def update(self, buildzones, damage_towers, slow_towers, castle):
         if self.up:
             self.yvel = -self.speed
-
         if self.down:
-            self.yvel = self.speed     
-                       
+            self.yvel = self.speed                     
         if self.left:
             self.xvel = -self.speed
- 
         if self.right:
             self.xvel = self.speed
          
@@ -28,6 +25,7 @@ class Enemy(sprite.Sprite):
         self.rect.y += self.yvel        
         self.rect.x += self.xvel
         self.speed = self.abs_speed
+        
         self.collide(buildzones, damage_towers, slow_towers, castle)
         
     def collide(self, buildzones, damage_towers, slow_towers, castle):
@@ -36,15 +34,12 @@ class Enemy(sprite.Sprite):
                 if self.right:                      
                     self.rect.right = c.rect.left
                     self.right = False    
-
                 if self.left:                      
                     self.rect.left = c.rect.right
                     self.left = False
-                    
                 if self.down:                      
                     self.rect.bottom = c.rect.top 
                     self.down = False
-                    
                 if self.up:                      
                     self.rect.top = c.rect.bottom 
                     self.up = False
@@ -78,11 +73,11 @@ class Enemy1(Enemy):
     def __init__(self, x, y):
         sprite.Sprite.__init__(self)
         self.image = image.load("%s/images/enemies/1.png" % ICON_DIR) 
+        self.f = open('Turns.txt', 'r')
+        self.turn = self.f.readline()
         self.rect = Rect(x, y, EN_WIDTH, EN_HEIGHT)
         self.up = self.down = self.right = self.left = False
         self.right = True
-        self.f = open('Turns.txt', 'r')
-        self.turn = self.f.readline()
         self.k = 0
         self.death = False
         self.castle = False
@@ -91,17 +86,17 @@ class Enemy1(Enemy):
         self.speed = self.abs_speed
         self.hp = 500
         self.cost = 75
-        self.damage = 500
+        self.damage = 100
 
 class Enemy2(Enemy):
     def __init__(self, x, y):
         sprite.Sprite.__init__(self)
         self.image = image.load("%s/images/enemies/2.png" % ICON_DIR) 
+        self.f = open('Turns.txt', 'r')
+        self.turn = self.f.readline()
         self.rect = Rect(x, y, EN_WIDTH, EN_HEIGHT)
         self.up = self.down = self.right = self.left = False
         self.right = True
-        self.f = open('Turns.txt', 'r')
-        self.turn = self.f.readline()
         self.k = 0
         self.death = False
         self.castle = False
@@ -116,11 +111,11 @@ class Enemy3(Enemy):
     def __init__(self, x, y):
         sprite.Sprite.__init__(self)
         self.image = image.load("%s/images/enemies/3.png" % ICON_DIR) 
+        self.f = open('Turns.txt', 'r')
+        self.turn = self.f.readline()
         self.rect = Rect(x, y, EN_WIDTH, EN_HEIGHT)
         self.up = self.down = self.right = self.left = False
         self.right = True
-        self.f = open('Turns.txt', 'r')
-        self.turn = self.f.readline()
         self.k = 0
         self.death = False
         self.castle = False
@@ -129,17 +124,17 @@ class Enemy3(Enemy):
         self.speed = self.abs_speed
         self.hp = 10000
         self.cost = 1000
-        self.damage = 1000
+        self.damage = 2000
 
 class BOSS(Enemy):
     def __init__(self, x, y):
         sprite.Sprite.__init__(self)
         self.image = image.load("%s/images/enemies/BOSS.png" % ICON_DIR) 
+        self.f = open('Turns.txt', 'r')
+        self.turn = self.f.readline()
         self.rect = Rect(x, y, EN_WIDTH, EN_HEIGHT)
         self.up = self.down = self.right = self.left = False
         self.right = True
-        self.f = open('Turns.txt', 'r')
-        self.turn = self.f.readline()
         self.k = 0
         self.death = False
         self.castle = False

@@ -5,9 +5,9 @@ class Scene:
         self.__next_scene = next_scene
 
     def loop(self, dt):
-        self.__event(pygame.event)
         self._update(dt)
         self._draw(dt)
+        self.__event(pygame.event)
 
     def start(self, display):
         self.display = display

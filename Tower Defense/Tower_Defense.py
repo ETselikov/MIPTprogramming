@@ -4,7 +4,7 @@ from Scenes import *
 class Game():
     def __init__(self, width, height, color , scene   = None):
         pygame.init()       
-        self.scene     = scene
+        self.scene = scene
         self.__display = pygame.display.set_mode((width, height))
         pygame.display.set_caption("Tower Defense")
         pygame.mouse.set_cursor(*pygame.cursors.tri_left)
@@ -13,19 +13,15 @@ class Game():
         pygame.mixer.music.load("%s/sounds/Main_Menu.mp3" % DIR)
         pygame.mixer.music.play(-1)
 
-    def game_loop(self):
-        
+    def game_loop(self): 
         while self.scene != None:
                 clock = pygame.time.Clock()
-                dt    = 0
-                
+                dt = 0
                 self.scene.start(self.__display)
-
+                
                 while not self.scene.is_end():
                     self.scene.loop(dt)
-
                     pygame.display.flip()
-
                     dt = clock.tick(60)
 
                 self.scene = self.scene.next()
