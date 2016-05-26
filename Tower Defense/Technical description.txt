@@ -1,0 +1,20 @@
+Tower_Defense
+
+In my program it is simple to:
+- create and change menu 
+- add new types of towers and enemies
+- create levels 
+- change sprites and music
+
+My program has:
+- simple interface
+- cool music
+- tiny amount of bugs
+- high resolution 8bit graphics
+- manually drawn sprites
+- 3 types of towers, 2 damage types and 1 slow type
+- 3 types of enemies and one BOSS 
+
+My program can:
+- exite you
+- present me a good mark
